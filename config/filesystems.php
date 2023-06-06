@@ -63,10 +63,10 @@ return [
 
         'sftp' => [
             'driver' => 'sftp',
-            'host' => env('SAGE_SFTP_HOST'),
-            'username' => env('SAGE_SFTP_USERNAME'),
-            'password' => env('SAGE_SFTP_PASSWORD'),
-            'port' => (int) env('SAGE_SFTP_PORT', 22),
+            'host' => env('SFTP_HOST'),
+            'username' => env('SFTP_USERNAME'),
+            'password' => env('SFTP_PASSWORD'),
+            'port' => (int) env('SFTP_PORT', 22),
             // 'root' => '',
         ],
 

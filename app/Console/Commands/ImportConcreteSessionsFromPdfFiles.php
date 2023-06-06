@@ -32,6 +32,9 @@ class ImportConcreteSessionsFromPdfFiles extends Command
 
         foreach($files as $sftpFilePath) {
             $filename = basename($sftpFilePath);
+            $deliveredAt = Carbon::createFromTimestamp(
+                Storage::disk('sftp')->lastModified($sftpFilePath)
+            );
 
             Log::channel('pdfs_import')->info('Import file starting', [
                 "filename" => $filename
@@ -57,6 +60,8 @@ class ImportConcreteSessionsFromPdfFiles extends Command
                 'consumer_id' => $consumer->id,
                 'file_name' => $filename,
                 'file_path' => Storage::disk('imports')->path($filename),
+                'delivered_at' => $deliveredAt,
+                'imported_at' => Carbon::now(),
             ]);
 
             //we keep file in archive folder instead of deleting it
