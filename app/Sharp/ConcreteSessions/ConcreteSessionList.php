@@ -22,14 +22,24 @@ class ConcreteSessionList extends SharpEntityList
             ->addField(
                 EntityListField::make('file_name')
                     ->setLabel('Fichier')
+            )
+            ->addField(
+                EntityListField::make('quantity')
+                    ->setLabel('Quantité')
+            )
+            ->addField(
+                EntityListField::make('concrete_type')
+                    ->setLabel('Type de béton')
             );
     }
 
     public function buildListLayout(EntityListFieldsLayout $fieldsLayout): void
     {
         $fieldsLayout
-            ->addColumn('delivered_at', 6)
-            ->addColumn('file_name', 6);
+            ->addColumn('delivered_at', 3)
+            ->addColumn('concrete_type', 3)
+            ->addColumn('quantity', 2)
+            ->addColumn('file_name', 4);
     }
 
     protected function getInstanceCommands(): ?array
@@ -48,11 +58,23 @@ class ConcreteSessionList extends SharpEntityList
     public function getListData(): array|Arrayable
     {
         $concreteSessions = ConcreteSession::orderBy('delivered_at', 'desc')
-            ->where('consumer_id', $this->queryParams->filterFor('consumer_id'));
+            ->where('consumer_id', $this->queryParams->filterFor('consumer_id'))
+            ->when($this->queryParams->hasSearch(), function ($posts) {
+                foreach ($this->queryParams->searchWords() as $word) {
+                    $posts->where(function ($query) use ($word) {
+                        $query
+                            ->orWhere('file_name', 'like', $word)
+                            ->orWhere('concrete_type', 'like', $word);
+                    });
+                }
+            });
 
         return $this
             ->setCustomTransformer('delivered_at', function ($value, ConcreteSession $concreteSession) {
                 return $concreteSession->delivered_at->isoFormat('LLLL');
+            })
+            ->setCustomTransformer('quantity', function ($value, ConcreteSession $concreteSession) {
+                return $concreteSession->quantity . ' m³';
             })
             ->transform($concreteSessions->get());
     }

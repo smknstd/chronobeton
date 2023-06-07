@@ -127,10 +127,10 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
-        'import_pdfs' => [
-            'name' => 'import_pdfs',
+        'pdfs_import' => [
+            'name' => 'pdfs_import',
             'driver' => 'single',
-            'path' => storage_path('logs/import_pdfs.log'),
+            'path' => storage_path('logs/pdfs_import.log'),
             'level' => 'info',
         ],
     ],
