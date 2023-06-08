@@ -26,7 +26,7 @@ class ImportConcreteSessionsFromPdfFiles extends Command
      */
     public function handle()
     {
-        $allFiles = Storage::disk('sftp')->files('production');
+        $allFiles = Storage::disk('sftp')->files('PDF Production data/Production data RFID tag');
 
 //        if(count($files) == 0){
 //            Log::channel("pdfs_import")->warning('Import pdf files cron did not find any file to import');
