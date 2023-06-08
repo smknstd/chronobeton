@@ -33,7 +33,7 @@ class ImportConcreteSessionsFromPdfFiles extends Command
 //            return false;
 //        }
 
-        $files = array_slice($allFiles, 0, 2);
+        $files = array_slice($allFiles, 0, 20);
 
         foreach($files as $sftpFilePath) {
             $filename = basename($sftpFilePath);
@@ -106,7 +106,9 @@ class ImportConcreteSessionsFromPdfFiles extends Command
             return null;
         }
 
-        return (int) Str::remove(' m³', Str::after($quantityString, 'Quantité totale: '));
+        $quantityFloatString = Str::remove(' m³', Str::after($quantityString, 'Quantité totale: '));
+
+        return (int) round(floatval(Str::replace(',', '.', $quantityFloatString)) * 100);
     }
 
     private function extractConcreteType(Collection $pdfStrings): ?string

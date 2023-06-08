@@ -74,7 +74,7 @@ class ConcreteSessionList extends SharpEntityList
                 return $concreteSession->delivered_at->isoFormat('LLLL');
             })
             ->setCustomTransformer('quantity', function ($value, ConcreteSession $concreteSession) {
-                return $concreteSession->quantity . ' m³';
+                return number_format($concreteSession->quantity / 100, 2, ',', '') . ' m³';
             })
             ->transform($concreteSessions->get());
     }
