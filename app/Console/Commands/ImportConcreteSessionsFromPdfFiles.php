@@ -26,12 +26,14 @@ class ImportConcreteSessionsFromPdfFiles extends Command
      */
     public function handle()
     {
-        $files = Storage::disk('sftp')->files('production');
+        $allFiles = Storage::disk('sftp')->files('production');
 
-        if(count($files) == 0){
-            Log::channel("pdfs_import")->warning('Import pdf files cron did not find any file to import');
-            return false;
-        }
+//        if(count($files) == 0){
+//            Log::channel("pdfs_import")->warning('Import pdf files cron did not find any file to import');
+//            return false;
+//        }
+
+        $files = array_slice($allFiles, 0, 2);
 
         foreach($files as $sftpFilePath) {
             $filename = basename($sftpFilePath);
