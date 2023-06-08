@@ -26,14 +26,12 @@ class ImportConcreteSessionsFromPdfFiles extends Command
      */
     public function handle()
     {
-        $allFiles = Storage::disk('sftp')->files('PDF Production data/Production data RFID tag');
+        $files = Storage::disk('sftp')->files('PDF Production data/Production data RFID tag');
 
 //        if(count($files) == 0){
 //            Log::channel("pdfs_import")->warning('Import pdf files cron did not find any file to import');
 //            return false;
 //        }
-
-        $files = array_slice($allFiles, 0, 20);
 
         foreach($files as $sftpFilePath) {
             $filename = basename($sftpFilePath);
@@ -89,7 +87,7 @@ class ImportConcreteSessionsFromPdfFiles extends Command
             //we keep file in archive folder instead of deleting it
 //            Storage::disk('sftp')->move($sftpFilePath, 'sage-ekip/Archives/' . $filename . '.imported.' . Carbon::now()->format('Ymd'));
 
-            Log::channel('pdfs_import')->info('Import file finished with success (distant file has been archived)', [
+            Log::channel('pdfs_import')->info('Import file finished with success', [
                 "filename" => $filename,
             ]);
         }
