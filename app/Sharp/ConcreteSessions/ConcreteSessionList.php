@@ -4,6 +4,7 @@ namespace App\Sharp\ConcreteSessions;
 
 use App\Models\ConcreteSession;
 use App\Sharp\ConcreteSessions\Commands\DownloadPdfCommand;
+use App\Sharp\ConcreteSessions\Filters\SessionDeliveryDateRangeFilter;
 use Code16\Sharp\EntityList\Fields\EntityListField;
 use Code16\Sharp\EntityList\Fields\EntityListFieldsContainer;
 use Code16\Sharp\EntityList\Fields\EntityListFieldsLayout;
@@ -54,9 +55,17 @@ class ConcreteSessionList extends SharpEntityList
         ];
     }
 
+    protected function getFilters(): ?array
+    {
+        return [
+            SessionDeliveryDateRangeFilter::class,
+        ];
+    }
+
     public function buildListConfig(): void
     {
         $this
+            ->configurePaginated()
             ->configureSearchable();
     }
 
@@ -73,6 +82,13 @@ class ConcreteSessionList extends SharpEntityList
                 }
             });
 
+        if ($range = $this->queryParams->filterFor('delivered_at')) {
+            $concreteSessions->whereBetween(
+                'delivered_at',
+                [$range['start'], $range['end']]
+            );
+        }
+
         return $this
             ->setCustomTransformer('delivered_at', function ($value, ConcreteSession $concreteSession) {
                 return $concreteSession->delivered_at->isoFormat('LLLL');
@@ -87,6 +103,6 @@ class ConcreteSessionList extends SharpEntityList
                         $concreteSession->consumer->customer->name,
                     );
             })
-            ->transform($concreteSessions->get());
+            ->transform($concreteSessions->paginate(50));
     }
 }
