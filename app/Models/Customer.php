@@ -18,6 +18,6 @@ class Customer extends Model
 
     public function consumers()
     {
-        return $this->hasMany(Consumer::class, "customer_id", "id", "consumers");
+        return $this->hasMany(Consumer::class, "customer_id");
     }
 }

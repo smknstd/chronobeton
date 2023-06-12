@@ -27,7 +27,7 @@ class CustomerList extends SharpEntityList
                     ->setLabel('Nom')
             )
             ->addField(
-                EntityListField::make('consumer_count')
+                EntityListField::make('consumers_count')
                     ->setLabel('Utilisateurs')
             )
             ->addField(
@@ -41,7 +41,7 @@ class CustomerList extends SharpEntityList
         $fieldsLayout
             ->addColumn('created_at', 3)
             ->addColumn('name', 3)
-            ->addColumn('consumer_count', 3)
+            ->addColumn('consumers_count', 3)
             ->addColumn('concrete_sessions_count', 3);
     }
 
@@ -74,7 +74,7 @@ class CustomerList extends SharpEntityList
                 return $customer->created_at->format('d/m/y H:i');
             })
             ->setCustomTransformer('consumers_count', function ($value, Customer $customer) {
-                return $customer->consumers()->count();
+                return $customer->consumers->count();
             })
             ->setCustomTransformer('concrete_sessions_count', function ($value, Customer $customer) {
                 return $customer->consumers->reduce(function (?int $carry, Consumer $consumer) {
