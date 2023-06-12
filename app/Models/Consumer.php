@@ -15,4 +15,9 @@ class Consumer extends Model
     {
         return $this->hasMany(ConcreteSession::class, "consumer_id");
     }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
 }

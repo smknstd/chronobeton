@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Sharp\ConcreteSessions;
+namespace App\Sharp\Consumers\Lists;
 
 use App\Models\ConcreteSession;
 use App\Sharp\ConcreteSessions\Commands\DownloadPdfCommand;
@@ -8,10 +8,9 @@ use Code16\Sharp\EntityList\Fields\EntityListField;
 use Code16\Sharp\EntityList\Fields\EntityListFieldsContainer;
 use Code16\Sharp\EntityList\Fields\EntityListFieldsLayout;
 use Code16\Sharp\EntityList\SharpEntityList;
-use Code16\Sharp\Utils\Links\LinkToShowPage;
 use Illuminate\Contracts\Support\Arrayable;
 
-class ConcreteSessionList extends SharpEntityList
+class ConsumerConcreteSessionList extends SharpEntityList
 {
     public function buildListFields(EntityListFieldsContainer $fieldsContainer): void
     {
@@ -20,17 +19,13 @@ class ConcreteSessionList extends SharpEntityList
                 EntityListField::make('delivered_at')
                     ->setLabel('Date')
             )
-            ->addField(
-                EntityListField::make('consumer')
-                    ->setLabel('Utilisateur')
-            )
-            ->addField(
-                EntityListField::make('file_name')
-                    ->setLabel('Fichier')
-            )
+//            ->addField(
+//                EntityListField::make('file_name')
+//                    ->setLabel('Fichier')
+//            )
             ->addField(
                 EntityListField::make('quantity')
-                    ->setLabel('Qté')
+                    ->setLabel('Quantité')
             )
             ->addField(
                 EntityListField::make('concrete_type')
@@ -42,9 +37,9 @@ class ConcreteSessionList extends SharpEntityList
     {
         $fieldsLayout
             ->addColumn('delivered_at', 3)
-            ->addColumn('consumer', 3)
-            ->addColumn('concrete_type', 5)
-            ->addColumn('quantity', 1);
+            ->addColumn('concrete_type', 7)
+            ->addColumn('quantity', 2);
+//            ->addColumn('file_name', 4);
     }
 
     protected function getInstanceCommands(): ?array
@@ -63,6 +58,7 @@ class ConcreteSessionList extends SharpEntityList
     public function getListData(): array|Arrayable
     {
         $concreteSessions = ConcreteSession::orderBy('delivered_at', 'desc')
+            ->where('consumer_id', $this->queryParams->filterFor('consumer_id'))
             ->when($this->queryParams->hasSearch(), function ($posts) {
                 foreach ($this->queryParams->searchWords() as $word) {
                     $posts->where(function ($query) use ($word) {
@@ -79,13 +75,6 @@ class ConcreteSessionList extends SharpEntityList
             })
             ->setCustomTransformer('quantity', function ($value, ConcreteSession $concreteSession) {
                 return number_format($concreteSession->quantity / 100, 2, ',', '') . ' m³';
-            })
-            ->setCustomTransformer('consumer', function ($value, ConcreteSession $concreteSession) {
-                return LinkToShowPage::make('consumers', $concreteSession->consumer->id)
-                    ->renderAsText($concreteSession->consumer->name) . sprintf('<div class="mt-1"><span style="font-style: italic; background-color: %s" class="text-white rounded px-2 py-1">%s</span></div',
-                        $concreteSession->consumer->customer->color->value,
-                        $concreteSession->consumer->customer->name,
-                    );
             })
             ->transform($concreteSessions->get());
     }

@@ -7,7 +7,7 @@ use Code16\Sharp\Utils\Entities\SharpEntity;
 
 class ConcreteSessionEntity extends SharpEntity
 {
-    protected string $label = 'Utilisateurs';
+    protected string $label = 'Sessions';
     protected ?string $list = ConcreteSessionList::class;
     protected array $prohibitedActions = ['view','create', 'update', 'delete'];
 }

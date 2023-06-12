@@ -9,6 +9,8 @@ class AppSharpMenu extends SharpMenu
     public function build(): SharpMenu
     {
         return $this
-            ->addEntityLink('consumers', 'Utilisateurs', 'fa-user');
+            ->addEntityLink('concrete_sessions', 'Sessions', 'fa-truck')
+            ->addEntityLink('consumers', 'Utilisateurs', 'fa-user')
+            ->addEntityLink('customers', 'Clients', 'fa-building');
     }
 }

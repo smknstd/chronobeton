@@ -3,7 +3,6 @@
 namespace App\Sharp\Consumers;
 
 use App\Models\Consumer;
-use App\Models\User;
 use Code16\Sharp\EntityList\Fields\EntityListField;
 use Code16\Sharp\EntityList\Fields\EntityListFieldsContainer;
 use Code16\Sharp\EntityList\Fields\EntityListFieldsLayout;
@@ -26,22 +25,32 @@ class ConsumerList extends SharpEntityList
                     ->setLabel('Nom')
             )
             ->addField(
+                EntityListField::make('customer')
+                    ->setLabel('Client')
+            )
+            ->addField(
                 EntityListField::make('rfid_code')
                     ->setLabel('N° Rfid')
             )
             ->addField(
                 EntityListField::make('concrete_sessions_count')
                     ->setLabel('Nb. sessions')
+            )
+            ->addField(
+                EntityListField::make('concrete_sessions_quantity_sum')
+                    ->setLabel('Total')
             );
     }
 
     public function buildListLayout(EntityListFieldsLayout $fieldsLayout): void
     {
         $fieldsLayout
-            ->addColumn('created_at', 3)
+            ->addColumn('created_at', 2)
             ->addColumn('name', 3)
-            ->addColumn('rfid_code', 3)
-            ->addColumn('concrete_sessions_count', 3);
+            ->addColumn('customer', 3)
+            ->addColumn('rfid_code', 2)
+            ->addColumn('concrete_sessions_count', 1)
+            ->addColumn('concrete_sessions_quantity_sum', 1);
     }
 
     protected function getInstanceCommands(): ?array
@@ -75,6 +84,19 @@ class ConsumerList extends SharpEntityList
             })
             ->setCustomTransformer('concrete_sessions_count', function ($value, Consumer $consumer) {
                 return $consumer->concreteSessions()->count();
+            })
+            ->setCustomTransformer('customer', function ($value, Consumer $consumer) {
+                return sprintf('<span style="font-style: italic; background-color: %s" class="text-white rounded px-2 py-1">%s</span>',
+                    $consumer->customer->color->value,
+                    $consumer->customer->name,
+                );
+            })
+            ->setCustomTransformer('concrete_sessions_quantity_sum', function ($value, Consumer $consumer) {
+                $quantity = $consumer->concreteSessions->reduce(function ($carry, $item) {
+                    return $carry + $item->quantity;
+                }, 0);
+
+                return number_format($quantity / 100, 2, ',', '') . ' m³';
             })
             ->transform($consumers->get());
     }

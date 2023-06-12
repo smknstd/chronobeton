@@ -17,9 +17,10 @@ class ConsumerShow extends SharpShow
     {
         $showFields
             ->addField(SharpShowTextField::make('name')->setLabel('Nom'))
+            ->addField(SharpShowTextField::make('customer')->setLabel('Client'))
             ->addField(SharpShowTextField::make('rfid_code')->setLabel('N° RFID'))
             ->addField(
-                SharpShowEntityListField::make('concrete_sessions', 'concrete_sessions')
+                SharpShowEntityListField::make('consumer_concrete_sessions', 'consumer_concrete_sessions')
                     ->setLabel('Sessions')
                     ->showCount()
                     ->setShowIfEmpty()
@@ -43,15 +44,22 @@ class ConsumerShow extends SharpShow
                     ->addColumn(6, function (ShowLayoutColumn $column) {
                         $column
                             ->withSingleField('name')
+                            ->withSingleField('customer')
                             ->withSingleField('rfid_code');
                     });
             })
-            ->addEntityListSection('concrete_sessions');
+            ->addEntityListSection('consumer_concrete_sessions');
     }
 
     public function find(mixed $id): array
     {
         return $this
+            ->setCustomTransformer('customer', function ($value, Consumer $consumer) {
+                return sprintf('<span style="font-style: italic; background-color: %s" class="text-white rounded px-2 py-1">%s</span>',
+                    $consumer->customer->color->value,
+                    $consumer->customer->name,
+                );
+            })
             ->transform(Consumer::findOrFail($id));
     }
 }

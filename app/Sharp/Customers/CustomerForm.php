@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Sharp\Consumers;
+namespace App\Sharp\Customers;
 
-use App\Models\Consumer;
+use App\Enums\ColorTheme;
 use App\Models\Customer;
-use App\Models\FundDistributor;
 use Code16\Sharp\Form\Eloquent\WithSharpFormEloquentUpdater;
 use Code16\Sharp\Form\Fields\SharpFormSelectField;
 use Code16\Sharp\Form\Fields\SharpFormTextField;
@@ -13,10 +12,10 @@ use Code16\Sharp\Form\Layout\FormLayoutColumn;
 use Code16\Sharp\Form\SharpForm;
 use Code16\Sharp\Utils\Fields\FieldsContainer;
 
-class ConsumerForm extends SharpForm
+class CustomerForm extends SharpForm
 {
     use WithSharpFormEloquentUpdater;
-    protected ?string $formValidatorClass = ConsumerValidator::class;
+    protected ?string $formValidatorClass = CustomerValidator::class;
 
     public function buildFormFields(FieldsContainer $formFields): void
     {
@@ -27,16 +26,8 @@ class ConsumerForm extends SharpForm
                     ->setMaxLength(150)
             )
             ->addField(
-                SharpFormTextField::make('rfid_code')
-                    ->setLabel('N° RFID')
-                    ->setMaxLength(150)
-            )
-            ->addField(
-                SharpFormSelectField::make(
-                    'customer_id',
-                    Customer::orderBy('name')->pluck('name', 'id')->toArray()
-                )
-                    ->setLabel('Client')
+                SharpFormSelectField::make('color', ColorTheme::enum())
+                    ->setLabel('Thème')
                     ->setDisplayAsDropdown()
             );
     }
@@ -47,30 +38,29 @@ class ConsumerForm extends SharpForm
             ->addColumn(7, function (FormLayoutColumn $column) {
                 $column
                     ->withSingleField('name')
-                    ->withSingleField('rfid_code')
-                    ->withSingleField('customer_id');
+                    ->withSingleField('color');
             });
     }
 
     public function find($id): array
     {
         return $this
-            ->transform(Consumer::findOrFail($id));
+            ->transform(Customer::findOrFail($id));
     }
 
     public function update($id, array $data)
     {
-        $consumer = $id
-            ? Consumer::findOrFail($id)
-            : new Consumer();
+        $customer = $id
+            ? Customer::findOrFail($id)
+            : new Customer();
 
-        $this->save($consumer, $data);
+        $this->save($customer, $data);
 
-        return $consumer->id;
+        return $customer->id;
     }
 
     public function delete($id): void
     {
-        Consumer::findOrFail($id)->delete();
+        Customer::findOrFail($id)->delete();
     }
 }

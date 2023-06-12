@@ -8,7 +8,9 @@ return [
 
     'entities' => [
         'consumers' => \App\Sharp\Entities\ConsumerEntity::class,
+        'consumer_concrete_sessions' => \App\Sharp\Entities\ConsumerConcreteSessionEntity::class,
         'concrete_sessions' => \App\Sharp\Entities\ConcreteSessionEntity::class,
+        'customers' => \App\Sharp\Entities\CustomerEntity::class,
     ],
 
     'dashboards' => [
