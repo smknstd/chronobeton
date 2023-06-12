@@ -2,7 +2,9 @@
 
 namespace App\Sharp\Consumers;
 
+use App\Models\ConcreteSession;
 use App\Models\Consumer;
+use App\Models\Customer;
 use Code16\Sharp\EntityList\Fields\EntityListField;
 use Code16\Sharp\EntityList\Fields\EntityListFieldsContainer;
 use Code16\Sharp\EntityList\Fields\EntityListFieldsLayout;
@@ -14,11 +16,6 @@ class ConsumerList extends SharpEntityList
     public function buildListFields(EntityListFieldsContainer $fieldsContainer): void
     {
         $fieldsContainer
-            ->addField(
-                EntityListField::make('created_at')
-                    ->setSortable()
-                    ->setLabel('Création')
-            )
             ->addField(
                 EntityListField::make('name')
                     ->setSortable()
@@ -34,23 +31,27 @@ class ConsumerList extends SharpEntityList
             )
             ->addField(
                 EntityListField::make('concrete_sessions_count')
-                    ->setLabel('Nb. sessions')
+                    ->setLabel('Sessions')
             )
             ->addField(
                 EntityListField::make('concrete_sessions_quantity_sum')
                     ->setLabel('Total')
+            )
+            ->addField(
+                EntityListField::make('last_concrete_session_at')
+                    ->setLabel('Dernière session')
             );
     }
 
     public function buildListLayout(EntityListFieldsLayout $fieldsLayout): void
     {
         $fieldsLayout
-            ->addColumn('created_at', 2)
-            ->addColumn('name', 3)
-            ->addColumn('customer', 3)
-            ->addColumn('rfid_code', 2)
+            ->addColumn('name', 2)
+            ->addColumn('customer', 2)
+            ->addColumn('rfid_code', 3)
             ->addColumn('concrete_sessions_count', 1)
-            ->addColumn('concrete_sessions_quantity_sum', 1);
+            ->addColumn('concrete_sessions_quantity_sum', 2)
+            ->addColumn('last_concrete_session_at', 2);
     }
 
     protected function getInstanceCommands(): ?array
@@ -79,9 +80,6 @@ class ConsumerList extends SharpEntityList
                 });
 
         return $this
-            ->setCustomTransformer('created_at', function ($value, Consumer $consumer) {
-                return $consumer->created_at->format('d/m/y H:i');
-            })
             ->setCustomTransformer('concrete_sessions_count', function ($value, Consumer $consumer) {
                 return $consumer->concreteSessions()->count();
             })
@@ -90,6 +88,12 @@ class ConsumerList extends SharpEntityList
                     $consumer->customer->color->value,
                     $consumer->customer->name,
                 );
+            })
+            ->setCustomTransformer('last_concrete_session_at', function ($value, Consumer $consumer) {
+                $lastSession = ConcreteSession::where('consumer_id', $consumer->id)
+                    ->orderBy('delivered_at', 'desc')->first();
+
+                return $lastSession?->delivered_at->diffForHumans() ?? '<i>Aucune</i>';
             })
             ->setCustomTransformer('concrete_sessions_quantity_sum', function ($value, Consumer $consumer) {
                 $quantity = $consumer->concreteSessions->reduce(function ($carry, $item) {

@@ -17,11 +17,6 @@ class CustomerList extends SharpEntityList
     {
         $fieldsContainer
             ->addField(
-                EntityListField::make('created_at')
-                    ->setSortable()
-                    ->setLabel('Création')
-            )
-            ->addField(
                 EntityListField::make('name')
                     ->setSortable()
                     ->setLabel('Nom')
@@ -32,17 +27,21 @@ class CustomerList extends SharpEntityList
             )
             ->addField(
                 EntityListField::make('concrete_sessions_count')
-                    ->setLabel('Nb. sessions')
+                    ->setLabel('Sessions')
+            )
+            ->addField(
+                EntityListField::make('concrete_sessions_quantity_sum')
+                    ->setLabel('Total')
             );
     }
 
     public function buildListLayout(EntityListFieldsLayout $fieldsLayout): void
     {
         $fieldsLayout
-            ->addColumn('created_at', 3)
-            ->addColumn('name', 3)
-            ->addColumn('consumers_count', 3)
-            ->addColumn('concrete_sessions_count', 3);
+            ->addColumn('name', 6)
+            ->addColumn('consumers_count', 2)
+            ->addColumn('concrete_sessions_count', 2)
+            ->addColumn('concrete_sessions_quantity_sum', 2);
     }
 
     protected function getInstanceCommands(): ?array
@@ -70,9 +69,6 @@ class CustomerList extends SharpEntityList
                 });
 
         return $this
-            ->setCustomTransformer('created_at', function ($value, Customer $customer) {
-                return $customer->created_at->format('d/m/y H:i');
-            })
             ->setCustomTransformer('consumers_count', function ($value, Customer $customer) {
                 return $customer->consumers->count();
             })
@@ -80,6 +76,15 @@ class CustomerList extends SharpEntityList
                 return $customer->consumers->reduce(function (?int $carry, Consumer $consumer) {
                     return $carry + $consumer->concreteSessions()->count();
                 }, 0);
+            })
+            ->setCustomTransformer('concrete_sessions_quantity_sum', function ($value, Customer $customer) {
+                $quantity = $customer->consumers->reduce(function (?int $carry, Consumer $consumer) {
+                    return $carry + $consumer->concreteSessions->reduce(function ($carry2, $item) {
+                            return $carry2 + $item->quantity;
+                        }, 0);
+                }, 0);
+
+                return number_format($quantity / 100, 2, ',', '') . ' m³';
             })
             ->transform($customers->get());
     }
